@@ -4,7 +4,7 @@
 <meta name="theme-color" content="#1f5fa8">
 <meta name="description" content="Chi entra nel programma e che cosa può fare.">
 <title>Utenti — PdRManager</title>
-<link rel="stylesheet" href="stile.css">
+<link rel="stylesheet" href="stile.css?v=e7299d59">
 </head><body>
 <header class="barra"><div class="dentro">
 <a class="marchio" href="index.html"><span class="segno">PdR</span><span class="testo">PdRManager</span></a>
@@ -48,6 +48,15 @@ addEventListener('DOMContentLoaded', function () {
     '<button class="dopo" aria-label="Immagine successiva">\u203a</button>' +
     '<div class="telaio"><img alt=""></div>' +
     '<p class="didascalia"></p>';
+  /* Le misure del riquadro esterno gliele diamo qui, oltre che nel foglio di
+     stile: se quello non arrivasse — vecchio in cache, o non caricato — una
+     lente senza regole sarebbe un riquadro qualunque in fondo alla pagina,
+     con l'immagine grande appiccicata sotto a tutto. Così, comunque vada,
+     resta sopra la pagina e si chiude. */
+  var fisso = { position: 'fixed', top: '0', right: '0', bottom: '0',
+                left: '0', width: '100%', height: '100%', zIndex: '60',
+                display: 'none', background: 'rgba(9,14,22,.88)' };
+  for (var misura in fisso) lente.style[misura] = fisso[misura];
   document.body.appendChild(lente);
 
   var figura = lente.querySelector('img');
@@ -74,11 +83,13 @@ addEventListener('DOMContentLoaded', function () {
     tornare = document.activeElement;
     mostra(indice);
     lente.classList.add('aperta');
+    lente.style.display = 'block';   /* lo stile scritto qui batte il foglio */
     document.body.classList.add('fermo');
     lente.querySelector('.chiudi').focus();
   }
   function chiudi() {
     lente.classList.remove('aperta');
+    lente.style.display = 'none';
     document.body.classList.remove('fermo');
     figura.removeAttribute('src');
     if (tornare && tornare.focus) tornare.focus();
