@@ -30,5 +30,86 @@ addEventListener('DOMContentLoaded', function () {
   }, { rootMargin: '0px 0px -8% 0px' });
   pezzi.forEach(function (p) { guarda.observe(p); });
 });
+
+/* La lente. I collegamenti restano collegamenti veri al file dell'immagine:
+   qui si ferma il clic e la si apre sopra la pagina. Con il JavaScript spento
+   non succede niente di male — si apre il file, come prima. */
+addEventListener('DOMContentLoaded', function () {
+  var apribili = [].slice.call(document.querySelectorAll('a[data-lente]'));
+  if (!apribili.length) return;
+
+  var lente = document.createElement('div');
+  lente.className = 'lente' + (apribili.length < 2 ? ' sola' : '');
+  lente.setAttribute('role', 'dialog');
+  lente.setAttribute('aria-modal', 'true');
+  lente.innerHTML =
+    '<button class="chiudi" aria-label="Chiudi">\u00d7</button>' +
+    '<button class="prima" aria-label="Immagine precedente">\u2039</button>' +
+    '<button class="dopo" aria-label="Immagine successiva">\u203a</button>' +
+    '<div class="telaio"><img alt=""></div>' +
+    '<p class="didascalia"></p>';
+  document.body.appendChild(lente);
+
+  var figura = lente.querySelector('img');
+  var didascalia = lente.querySelector('.didascalia');
+  var quale = 0, tornare = null;
+
+  function mostra(indice) {
+    quale = (indice + apribili.length) % apribili.length;
+    var collegamento = apribili[quale];
+    var nome = collegamento.getAttribute('data-lente') || '';
+    figura.src = collegamento.getAttribute('href');
+    figura.alt = nome;
+    didascalia.innerHTML = '';
+    didascalia.appendChild(document.createTextNode(nome));
+    var aiuto = document.createElement('small');
+    aiuto.textContent = apribili.length > 1
+      ? 'Clicca l\'immagine per ingrandirla · frecce per scorrere · Esc per chiudere'
+      : 'Clicca l\'immagine per ingrandirla · Esc per chiudere';
+    didascalia.appendChild(aiuto);
+    lente.classList.remove('ingrandita');
+    lente.querySelector('.telaio').scrollTop = 0;
+  }
+  function apri(indice) {
+    tornare = document.activeElement;
+    mostra(indice);
+    lente.classList.add('aperta');
+    document.body.classList.add('fermo');
+    lente.querySelector('.chiudi').focus();
+  }
+  function chiudi() {
+    lente.classList.remove('aperta');
+    document.body.classList.remove('fermo');
+    figura.removeAttribute('src');
+    if (tornare && tornare.focus) tornare.focus();
+  }
+
+  apribili.forEach(function (collegamento, indice) {
+    collegamento.addEventListener('click', function (evento) {
+      evento.preventDefault();
+      apri(indice);
+    });
+  });
+  lente.addEventListener('click', function (evento) {
+    if (evento.target === lente ||
+        evento.target.classList.contains('telaio')) chiudi();
+  });
+  lente.querySelector('.chiudi').addEventListener('click', chiudi);
+  lente.querySelector('.prima').addEventListener('click', function () {
+    mostra(quale - 1);
+  });
+  lente.querySelector('.dopo').addEventListener('click', function () {
+    mostra(quale + 1);
+  });
+  figura.addEventListener('click', function () {
+    lente.classList.toggle('ingrandita');
+  });
+  addEventListener('keydown', function (evento) {
+    if (!lente.classList.contains('aperta')) return;
+    if (evento.key === 'Escape') chiudi();
+    else if (evento.key === 'ArrowLeft') mostra(quale - 1);
+    else if (evento.key === 'ArrowRight') mostra(quale + 1);
+  });
+});
 </script>
 </body></html>
