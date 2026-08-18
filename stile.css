@@ -414,9 +414,16 @@ footer code { background: var(--selezione); border-radius: 6px;
 .lente.aperta { display: block; }
 .lente .telaio {
   position: absolute; top: 62px; right: 68px; bottom: 72px; left: 68px;
-  overflow: auto; display: flex; align-items: center; justify-content: center;
+  overflow: auto; display: flex;
 }
+/* Si centra con `margin: auto`, non con `align-items`/`justify-content`.
+   Sembra la stessa cosa e non lo e': quando l'immagine ingrandita e' piu'
+   grande del telaio, il centraggio la fa debordare dalle due parti, e di
+   quello che esce **da sopra e da sinistra** non si torna piu' indietro —
+   la barra di scorrimento non ci arriva. Con `margin: auto` sta in mezzo
+   finche' ci sta, e appena non ci sta piu' si scorre tutta. */
 .lente img {
+  margin: auto;
   max-width: 100%; max-height: 100%; border-radius: 8px; background: #fff;
   box-shadow: 0 24px 70px rgba(0,0,0,.55); cursor: zoom-in;
 }
